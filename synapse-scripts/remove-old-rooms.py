@@ -16,9 +16,9 @@ def main(token):
     for room in rooms["rooms"]:
         if room["joined_local_members"] == 0:
             count+=1
-            print(room["room_id"])
-            print(room["name"])
-            #print(room[""])
+            print("ID: {}".format(room["room_id"]))
+            print("Name: {}".format(room["name"]))
+            print("Alias: {}".format(room["canonical_alias"]))
             r2 = requests.delete('http://localhost:8008/_synapse/admin/v1/rooms/{}'.format(room["room_id"]), headers=headers, data=body)
             if r2.status_code == 200:
                 print("deleted")
