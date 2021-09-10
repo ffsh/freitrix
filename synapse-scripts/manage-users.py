@@ -10,6 +10,27 @@ def convert_ts(user):
     user[2] = str(datetime.datetime.fromtimestamp(user[2]))
     return user
 
+def get_last_login(token, user):
+    headers = requests.structures.CaseInsensitiveDict()
+    headers["Accept"] = "application/json"
+    headers["Content-Type"] = 'Content-Type: application/json'
+    headers["Authorization"] = "Bearer {}".format(token)
+
+    r = requests.get('http://localhost:8008/_synapse/admin/v1/whois/{}'.format(user), headers=headers)
+    
+    biggest_timestamp = 0
+
+    if r.status_code == 200:
+        user_sessions = r.json()
+        #print(user_sessions)
+        for session in user_sessions["devices"][""]["sessions"]:
+            for connection in session["connections"]:
+                if connection["last_seen"] > biggest_timestamp:
+                    biggest_timestamp = connection["last_seen"]
+        return datetime.datetime.fromtimestamp(biggest_timestamp//1000)
+    else:
+        return ""
+
 def get_users(token):
     headers = requests.structures.CaseInsensitiveDict()
     headers["Accept"] = "application/json"
@@ -30,7 +51,7 @@ def get_users(token):
                 else:
                     user_email = user_email+" "+threepid["address"]
 
-        userList.append([user["name"], user_email, user_account["creation_ts"]])
+        userList.append([user["name"], user_email, user_account["creation_ts"], get_last_login(token, user["name"])])
 
     userList = sorted(userList, key=lambda user: user[2], reverse=False)
     userList = list(map(convert_ts, userList))
@@ -47,7 +68,7 @@ def list_users(token, print_json=False):
     if (print_json):
         print(json.dumps(userList))
     else:
-        print(tabulate(userList, headers=["Name", "E-Mail", "Creation date"], tablefmt="presto"))
+        print(tabulate(userList, headers=["Name", "E-Mail", "Creation date", "Last login"], tablefmt="presto"))
 
 
 def inform_user(user, token):
@@ -85,8 +106,9 @@ def remind_user(user, token):
     headers["Content-Type"] = 'Content-Type: application/json'
     headers["Authorization"] = "Bearer {}".format(token)
 
-    message = "Hallo {},\nbitte denke daran, Deinen Account vor Ablauf der Frist zu verifzieren,\n\
-sonst müssen wir Deinen Account leider löschen.\n\
+    message = "Hallo {},\nbitte denke daran, Deinen Account vor Ablauf der Frist (10.09) zu verifzieren,\n\
+sonst müssen wir Deinen Account leider löschen, die E-Mail-Adresse muss mit deinem Account verknüpft bleiben.\n\
+Dein Account hat akutell keine E-Mail-Adresse und ist damit von der Löschung betroffen.\n\
 https://freifunk-suedholstein.de/freitrix-account-validieren/\n\
 Wenn du Fragen hast, kannst du unserem info Raum beitreten: #info:freitrix.de".format(user)
 
@@ -143,6 +165,7 @@ if __name__ == "__main__":
     parser.add_argument('--remind', help='remind single user', action='store', dest="user_remind", type=str)
     parser.add_argument('--remind_all', help='remind all unverfied users', action='store_true')
     parser.add_argument('--delete', help='delete single user', action='store', dest="user_delete", type=str)
+    parser.add_argument('--last_login', help='last login of user', action='store', dest="user_last_login", type=str)
     args = parser.parse_args()
     if args.list:
         list_users(args.token, args.json)
@@ -158,5 +181,7 @@ if __name__ == "__main__":
             deactivate_user(args.user_delete, args.token)
         else:
             print("Deletion of user {} was canceled".format(args.user_delete))
+    elif args.user_last_login != None:
+        print(get_last_login(args.token, args.user_last_login))
     else:
         parser.print_usage()
