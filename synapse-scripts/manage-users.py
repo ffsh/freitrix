@@ -1,13 +1,17 @@
 #!python3
 
 import requests
-import argparse
+import click
 import datetime
 import json
 from tabulate import tabulate
 
+@click.group()
+def cli():
+    pass
+
 def convert_ts(user):
-    user[2] = str(datetime.datetime.fromtimestamp(user[2]))
+    user[3] = str(datetime.datetime.fromtimestamp(user[3]))
     return user
 
 def get_last_login(token, user):
@@ -31,13 +35,43 @@ def get_last_login(token, user):
     else:
         return ""
 
-def get_users(token):
+"""
+Return last login by user in terminal
+"""
+@cli.command("last-login")
+@click.option("--token", help="Admin Token from Matrix client", required=True)
+@click.argument("user", required=True)
+def last_login(token, user):
+    print(get_last_login(token ,user))
+
+"""
+Determine most important status
+"""
+def get_user_status(user):
+    user_status = "normal"
+    if user["admin"] == 1:
+        user_status = "admin"
+    if user["shadow_banned"] == 1:
+        user_status = "shadow banned"
+    if user["deactivated"] == 1:
+        user_status = "deactivated"
+    return user_status
+
+"""
+Retuns list of users
+"""
+def get_users(token, deactivated=False):
     headers = requests.structures.CaseInsensitiveDict()
     headers["Accept"] = "application/json"
     headers["Content-Type"] = 'Content-Type: application/json'
     headers["Authorization"] = "Bearer {}".format(token)
 
-    r = requests.get('http://localhost:8008/_synapse/admin/v2/users?from=0&guests=false', headers=headers)
+    if deactivated:
+        include_deactivated = "true"
+    else:
+        include_deactivated = "false"
+
+    r = requests.get('http://localhost:8008/_synapse/admin/v2/users?from=0&limit=200&guests=false&deactivated={}'.format(include_deactivated), headers=headers)
     users = r.json()
     userList = []
     for user in users["users"]:
@@ -50,10 +84,15 @@ def get_users(token):
                     user_email = threepid["address"]
                 else:
                     user_email = user_email+" "+threepid["address"]
+        
+        userList.append([user["name"], 
+                        get_user_status(user), 
+                        user_email,
+                        user_account["creation_ts"],
+                        get_last_login(token, user["name"])
+                        ])
 
-        userList.append([user["name"], user_email, user_account["creation_ts"], get_last_login(token, user["name"])])
-
-    userList = sorted(userList, key=lambda user: user[2], reverse=False)
+    userList = sorted(userList, key=lambda user: user[3], reverse=False)
     userList = list(map(convert_ts, userList))
 
     return userList
@@ -61,87 +100,25 @@ def get_users(token):
 """
 List users in terminal as table or as json
 """
-def list_users(token, print_json=False):
+@cli.command("list")
+@click.option("--token", help="Admin Token from Matrix client", required=True)
+@click.option("--json", "print_json", default=False, help="Print in json format instead of table.", is_flag=True)
+@click.option("--all", default=False, help="Will also print deactivated users", is_flag=True)
+def list_users(token, print_json=False, all=False):
     print("List of users...")
-    userList = get_users(token)
+    userList = get_users(token, deactivated=all)
 
     if (print_json):
         print(json.dumps(userList))
     else:
-        print(tabulate(userList, headers=["Name", "E-Mail", "Creation date", "Last login"], tablefmt="presto"))
+        print(tabulate(userList, headers=["Name", "User Status", "E-Mail", "Creation date", "Last login"], tablefmt="presto"))
 
-
-def inform_user(user, token):
-    headers = requests.structures.CaseInsensitiveDict()
-    headers["Accept"] = "application/json"
-    headers["Content-Type"] = 'Content-Type: application/json'
-    headers["Authorization"] = "Bearer {}".format(token)
-
-    deadline = datetime.datetime.now() + datetime.timedelta(days=30)
-    deadline = deadline.strftime('%d.%m.%Y')
-
-    message = "Hallo {},\nleider kommt es im Matrix Universum verstärkt zu Spam Angriffen, \
-daher möchten wir Dich bitten deinen Account mit einer E-Mail-Adresse zu verknüpfen.\n\
-https://freifunk-suedholstein.de/freitrix-account-validieren/\n\
-Wenn du Fragen hast, kannst du unserem info Raum beitreten: #info:freitrix.de\n\
-Du hast dafür 30 Tage Zeit, solltest Du bis dahin keine E-Mail mit Deinem Account verknüpft haben, \
-müssen wir Deinen Account leider löschen, da wir davon ausgehen müssen, dass es sich um einen Spam-Account handelt.\n\
-Die Frist endet am: {}\n".format(user, deadline)
-
-    body = {
-    "user_id": user,
-    "content": {
-        "msgtype": "m.text",
-        "body": message
-        }
-    }
-
-    r = requests.post('http://localhost:8008/_synapse/admin/v1/send_server_notice', headers=headers, data=json.dumps(body))
-    print("Server says: {}".format(r))
-    print("User: {}, deadline: {}".format(user, deadline))
-
-def remind_user(user, token):
-    headers = requests.structures.CaseInsensitiveDict()
-    headers["Accept"] = "application/json"
-    headers["Content-Type"] = 'Content-Type: application/json'
-    headers["Authorization"] = "Bearer {}".format(token)
-
-    message = "Hallo {},\nbitte denke daran, Deinen Account vor Ablauf der Frist (10.09) zu verifzieren,\n\
-sonst müssen wir Deinen Account leider löschen, die E-Mail-Adresse muss mit deinem Account verknüpft bleiben.\n\
-Dein Account hat akutell keine E-Mail-Adresse und ist damit von der Löschung betroffen.\n\
-https://freifunk-suedholstein.de/freitrix-account-validieren/\n\
-Wenn du Fragen hast, kannst du unserem info Raum beitreten: #info:freitrix.de".format(user)
-
-    body = {
-    "user_id": user,
-    "content": {
-        "msgtype": "m.text",
-        "body": message
-        }
-    }
-
-    r = requests.post('http://localhost:8008/_synapse/admin/v1/send_server_notice', headers=headers, data=json.dumps(body))
-    print("Server says: {}".format(r))
-    print("User: {} was reminded".format(user))
-
-def unverified(user):
-    if user[1] == "":
-        return True
-    else:
-        return False
-
-def find_user(condition, token):
-    if condition == "unverified":
-        print()
-        userList = get_users(token)
-        unverified_userList = filter(unverified, userList)
-        return unverified_userList
-
-def remind_all(token):
-    unverified_userList = find_user("unverified", token)
-    for user in unverified_userList:
-        remind_user(user[0], token)
-
+"""
+Delete a single user
+"""
+@cli.command("delete")
+@click.argument("user", required=True)
+@click.option("--token", help="Admin Token from Matrix client", required=True)
 def deactivate_user(user, token):
     headers = requests.structures.CaseInsensitiveDict()
     headers["Accept"] = "application/json"
@@ -152,36 +129,14 @@ def deactivate_user(user, token):
     "erase": True
     }
 
-    r = requests.post('http://localhost:8008/_synapse/admin/v1/deactivate/{}'.format(user), headers=headers, data=json.dumps(body))
-    print("Server says: {}".format(r))
-    print("User: {} was GDPR erased".format(user))
+    continue_delete = input("Are you sure you want to delete the user {}, if yes please type \"Yes\": ".format(user))
+    if continue_delete == "Yes":
+        r = requests.post('http://localhost:8008/_synapse/admin/v1/deactivate/{}'.format(user), headers=headers, data=json.dumps(body))
+        print("Server says: {}".format(r))
+        print("User: {} was GDPR erased".format(user))
+        pass
+    else:
+        print("Deletion of user {} was canceled".format(user))
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='List users')
-    parser.add_argument('--token', help='token for authentication')
-    parser.add_argument('--list', help='list user', action='store_true')
-    parser.add_argument('--json', help='print as json', action='store_true')
-    parser.add_argument('--inform', help='inform single user, currently unverified text', action='store', dest="user_inform", type=str)
-    parser.add_argument('--remind', help='remind single user', action='store', dest="user_remind", type=str)
-    parser.add_argument('--remind_all', help='remind all unverfied users', action='store_true')
-    parser.add_argument('--delete', help='delete single user', action='store', dest="user_delete", type=str)
-    parser.add_argument('--last_login', help='last login of user', action='store', dest="user_last_login", type=str)
-    args = parser.parse_args()
-    if args.list:
-        list_users(args.token, args.json)
-    elif args.user_inform != None:
-        inform_user(args.user_inform, args.token)
-    elif args.user_remind != None:
-        remind_user(args.user_remind, args.token)
-    elif args.remind_all:
-        remind_all(args.token)
-    elif args.user_delete != None:
-        continue_delete = input("Are you sure you want to delete the user {}, if yes please type \"Yes\": ".format(args.user_delete))
-        if continue_delete == "Yes":
-            deactivate_user(args.user_delete, args.token)
-        else:
-            print("Deletion of user {} was canceled".format(args.user_delete))
-    elif args.user_last_login != None:
-        print(get_last_login(args.token, args.user_last_login))
-    else:
-        parser.print_usage()
+    cli()
