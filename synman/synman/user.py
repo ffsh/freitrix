@@ -4,7 +4,6 @@ import requests
 import click
 import datetime
 import json
-from tabulate import tabulate
 
 
 class User:
@@ -35,7 +34,6 @@ class User:
     """
     Calculates the last login of a user, if no data is found the date will be 1970...
     """
-
     def get_last_login(self, user):
         r = requests.get(
             'http://localhost:8008/_synapse/admin/v1/whois/{}'.format(user), headers=self.headers)
@@ -90,11 +88,9 @@ class User:
 
         return userList
 
-    """
-    Delete a single user
-    """
-
+    
     def deactivate_user(self, user):
+        """ Delete a single user """
         body = {
             "erase": True
         }
