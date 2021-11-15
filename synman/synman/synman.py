@@ -1,6 +1,7 @@
 #!python3
 from synman.media import Media
 from synman.user import User
+from synman.rooms import Rooms
 import click
 import json
 from tabulate import tabulate
@@ -13,9 +14,19 @@ def cli():
 @click.option("--list", "list_media", default=False, help="list media", is_flag=True)
 @click.option("--token", help="Admin Token from Matrix client", required=True)
 def media(list_media, token):
+    """Manage media files"""
     if list_media:
         my_media = Media(token)
         my_media.list_media()
+
+@cli.command()
+@click.option("--clean", "clean", default=False, help="Removes empty rooms", is_flag=True)
+@click.option("--token", help="Admin Token from Matrix client", required=True)
+def rooms(clean, token):
+    """Manage rooms"""
+    if clean:
+        my_room = Rooms(token)
+        my_room.clean()
 
 @cli.command()
 @click.argument("user", required=True)
@@ -23,6 +34,7 @@ def media(list_media, token):
 @click.option("--delete", help="Delete the user based on GDPR standard.", required=True, is_flag=True)
 @click.option("--token", help="Admin Token from Matrix client", required=True)
 def user(user, last_login, delete, token):
+    """Manage users"""
     my_user = User(token)
     if last_login:
         output = "Last login of {} was {}".format(user, my_user.get_last_login(user))
@@ -48,6 +60,7 @@ def user(user, last_login, delete, token):
 @click.option("--json", "print_json", default=False, help="Print in json format instead of table.", is_flag=True)
 @click.option("--all", default=False, help="Will also print deactivated users", is_flag=True)
 def list_users(token, print_json=False, all=False):
+    """List users"""
     my_user = User(token)
 
     print("List of users...")
