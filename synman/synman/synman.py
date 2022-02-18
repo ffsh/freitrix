@@ -12,12 +12,16 @@ def cli():
 
 @cli.command()
 @click.option("--list", "list_media", default=False, help="list media", is_flag=True)
+@click.option("--clean", "clean_media", default=False, help="clean media", is_flag=True)
 @click.option("--token", help="Admin Token from Matrix client", required=True)
 def media(list_media, token):
     """Manage media files"""
     if list_media:
         my_media = Media(token)
         my_media.list_media()
+    elif clean_media:
+        my_media = Media(token)
+        my_media.clean_meida()
 
 @cli.command()
 @click.option("--clean", "clean", default=False, help="Removes empty rooms", is_flag=True)
