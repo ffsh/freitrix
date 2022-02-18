@@ -42,4 +42,7 @@ class Media:
 
         for user in users["users"]:
             if user["deactivated"] == 1:
-                print(user["name"], user["displayname"])
+                r2 = requests.get('http://localhost:8008//_synapse/admin/v1/users/{}/media'.format(user["name"]), headers=self.headers)
+                media = r2.json()
+                
+                print(user["name"], user["displayname"], media["total"])
