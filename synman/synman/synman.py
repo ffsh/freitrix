@@ -21,7 +21,7 @@ def media(list_media, token):
         my_media.list_media()
     elif clean_media:
         my_media = Media(token)
-        my_media.clean_meida()
+        my_media.clean_media()
 
 @cli.command()
 @click.option("--clean", "clean", default=False, help="Removes empty rooms", is_flag=True)
