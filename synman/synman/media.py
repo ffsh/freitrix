@@ -13,16 +13,21 @@ class Media:
         self.headers["Authorization"] = "Bearer {}".format(token)
 
     def __convert_bytes(self, hoarder):
-        hoarder[3] = humanize.naturalsize(hoarder[3])
+        hoarder[4] = humanize.naturalsize(hoarder[4])
         return hoarder
 
     def list_media(self):
         r = requests.get('http://localhost:8008/_synapse/admin/v1/statistics/users/media?limit=100&order_by=media_length', headers=self.headers)
-        media = r.json()
+        medias = r.json()
         datahoarders = []
         print("Media Users sorted by size")
-        for room in media["users"]:
-            datahoarders.append([room["user_id"], room["displayname"], room["media_count"], room["media_length"]])
-        datahoarders = sorted(datahoarders, key=lambda datahorder: datahorder[3], reverse=True)
+
+        for media in medias["users"]:
+            r2 = requests.get('http://localhost:8008/_synapse/admin/v2/users/{}'.format(media["user_id"]), headers=self.headers)
+            user = r2.json()
+            datahoarders.append([media["user_id"], user["deactivated"], media["displayname"], media["media_count"], media["media_length"]])
+
+        datahoarders = sorted(datahoarders, key=lambda datahorder: datahorder[4], reverse=True)
         datahoarders = list(map(self.__convert_bytes, datahoarders))
-        print(tabulate(datahoarders, headers=["userid", "displayname", "media_count", "media_length"]))
+
+        print(tabulate(datahoarders, headers=["userid", "deactivated", "displayname", "media_count", "media_length"]))
