@@ -46,3 +46,6 @@ class Media:
                 media = r2.json()
                 
                 print(user["name"], user["displayname"], media["total"])
+    
+    def delete_media(self):
+        pass
