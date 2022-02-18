@@ -25,7 +25,11 @@ class Media:
         for media in medias["users"]:
             r2 = requests.get('http://localhost:8008/_synapse/admin/v2/users/{}'.format(media["user_id"]), headers=self.headers)
             user = r2.json()
-            datahoarders.append([media["user_id"], user["deactivated"], media["displayname"], media["media_count"], media["media_length"]])
+            
+            if r2.status_code == 200:
+                datahoarders.append([media["user_id"], user["deactivated"], media["displayname"], media["media_count"], media["media_length"]])
+            else:
+                datahoarders.append([media["user_id"], "N/A", media["displayname"], media["media_count"], media["media_length"]])
 
         datahoarders = sorted(datahoarders, key=lambda datahorder: datahorder[4], reverse=True)
         datahoarders = list(map(self.__convert_bytes, datahoarders))
