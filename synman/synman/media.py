@@ -40,6 +40,6 @@ class Media:
         r = requests.get('http://localhost:8008/_synapse/admin/v2/users?from=0&limit=200&guests=false&deactivated=true', headers=self.headers)
         users = r.json()
 
-        for user in users:
+        for user in users["users"]:
             if user["deactivated"] == 1:
                 print(user["name"], user["displayname"])
