@@ -16,7 +16,7 @@ def cli():
 @click.option("--read", "read", default=False, help="Read reports", is_flag=True)
 @click.option("--detail", "detail", default=False, help="Detail reports", is_flag=True)
 @click.option("--token", help="Admin Token from Matrix client", required=True)
-def report(read, id, detail, token):
+def report(read, event_id, detail, token):
     """Manage reports"""
     my_report = Reports(token)
     if read:
