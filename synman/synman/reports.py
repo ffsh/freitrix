@@ -17,6 +17,9 @@ class Reports():
         rooms = r.json()
         print(json.dumps(rooms, indent=4))
 
-
+    def detail(self, event_id):
+        r = requests.get('http://localhost:8008/_synapse/admin/v1/event_reports/{}'.format(event_id), headers=self.headers)
+        rooms = r.json()
+        print(json.dumps(rooms, indent=4))
 
 

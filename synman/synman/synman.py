@@ -12,13 +12,18 @@ def cli():
     pass
 
 @cli.command()
+@click.argument("event_id", required=False)
 @click.option("--read", "read", default=False, help="Read reports", is_flag=True)
+@click.option("--detail", "detail", default=False, help="Detail reports", is_flag=True)
 @click.option("--token", help="Admin Token from Matrix client", required=True)
-def report(read, token):
+def report(read, id, detail, token):
     """Manage reports"""
     my_report = Reports(token)
     if read:
         my_report.read()
+    elif detail:
+        if event_id is not None:
+            my_report.detail(event_id)
 
 @cli.command()
 @click.option("--list", "list_media", default=False, help="list media", is_flag=True)
