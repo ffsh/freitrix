@@ -1,7 +1,7 @@
 #!python3
 
 import requests
-import argparse
+import json
 
 
 class Rooms():
@@ -46,8 +46,10 @@ class Rooms():
             biggestRooms.append([room["name"], room["joined_members"], room["joined_local_members"], room["version"]])
         print(tabulate(biggestRooms, headers=["Name", "Members", "Local Members", "Version"]))
     
-
-
+    def info(self, room):
+        r = requests.get('http://localhost:8008/_synapse/admin/v1/rooms/{}'.format(room), headers=self.headers)
+        rooms = r.json()
+        print(json.dumps(json.loads(rooms), indent=4))
 
 
 
