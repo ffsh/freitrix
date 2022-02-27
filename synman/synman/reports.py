@@ -12,7 +12,7 @@ class Reports():
         self.headers["Content-Type"] = 'Content-Type: application/json'
         self.headers["Authorization"] = "Bearer {}".format(token)
 
-    def read(self, room):
+    def read(self):
         r = requests.get('http://localhost:8008/_synapse/admin/v1/event_reports?from=0&limit=20', headers=self.headers)
         rooms = r.json()
         print(json.dumps(rooms, indent=4))
