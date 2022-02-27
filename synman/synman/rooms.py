@@ -29,6 +29,22 @@ class Rooms():
                 print("--------")
         print("{} rooms deleted.".format(count))
 
+    def list_rooms(self):
+        r = requests.get('http://localhost:8008/_synapse/admin/v1/rooms?limit=10&order_by=joined_members', headers=self.headers)
+        rooms = r.json()
+        biggestRooms = []
+        print("Biggest rooms sorted by members")
+        for room in rooms["rooms"]:
+            biggestRooms.append([room["name"], room["joined_members"], room["joined_local_members"], room["version"]])
+        print(tabulate(biggestRooms, headers=["Name", "Members", "Local Members", "Version"]))
+
+        r = requests.get('http://localhost:8008/_synapse/admin/v1/rooms?limit=10&order_by=joined_local_members', headers=self.headers)
+        rooms = r.json()
+        biggestRooms = []
+        print("\nBiggest rooms sorted by local members")
+        for room in rooms["rooms"]:
+            biggestRooms.append([room["name"], room["joined_members"], room["joined_local_members"], room["version"]])
+        print(tabulate(biggestRooms, headers=["Name", "Members", "Local Members", "Version"]))
     
 
 

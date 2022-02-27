@@ -25,12 +25,16 @@ def media(list_media, clean_media, token):
 
 @cli.command()
 @click.option("--clean", "clean", default=False, help="Removes empty rooms", is_flag=True)
+@click.option("--list", "list_rooms", default=False, help="List rooms", is_flag=True)
 @click.option("--token", help="Admin Token from Matrix client", required=True)
 def rooms(clean, token):
     """Manage rooms"""
+    my_room = Rooms(token)
     if clean:
-        my_room = Rooms(token)
         my_room.clean()
+    elif list_rooms:
+        my_room.list_rooms()
+
 
 @cli.command()
 @click.argument("user", required=True)
