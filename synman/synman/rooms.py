@@ -50,7 +50,7 @@ class Rooms():
     def info(self, room):
         r = requests.get('http://localhost:8008/_synapse/admin/v1/rooms/{}'.format(room), headers=self.headers)
         rooms = r.json()
-        print(json.dumps(json.loads(rooms), indent=4))
+        print(json.dumps(json.load(rooms), indent=4))
 
 
 
