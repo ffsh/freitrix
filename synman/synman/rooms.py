@@ -2,6 +2,7 @@
 
 import requests
 import json
+from tabulate import tabulate
 
 
 class Rooms():
