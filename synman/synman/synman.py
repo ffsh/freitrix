@@ -2,6 +2,7 @@
 from synman.media import Media
 from synman.user import User
 from synman.rooms import Rooms
+from synman.reports import Reports
 import click
 import json
 from tabulate import tabulate
@@ -11,16 +12,24 @@ def cli():
     pass
 
 @cli.command()
+@click.option("--read", "read", default=False, help="Read reports", is_flag=True)
+@click.option("--token", help="Admin Token from Matrix client", required=True)
+def report(read, token):
+    """Manage reports"""
+    my_report = Reports(token)
+    if read:
+        my_report.read()
+
+@cli.command()
 @click.option("--list", "list_media", default=False, help="list media", is_flag=True)
 @click.option("--clean", "clean_media", default=False, help="clean media", is_flag=True)
 @click.option("--token", help="Admin Token from Matrix client", required=True)
 def media(list_media, clean_media, token):
     """Manage media files"""
+    my_media = Media(token)
     if list_media:
-        my_media = Media(token)
         my_media.list_media()
     elif clean_media:
-        my_media = Media(token)
         my_media.clean_media()
 
 @cli.command()
