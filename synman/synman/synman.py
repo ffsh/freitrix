@@ -40,7 +40,9 @@ def media(list_media, clean_media, delete_date, token):
         my_media.clean_media()
     elif delete_date:
         timestamp = int((datetime.now() - timedelta(days=356)).timestamp() * 1000)
+        timestamp2 = int((datetime.now() - timedelta(days=90)).timestamp() * 1000)
         my_media.delete_local_date(timestamp)
+        my_media.delete_cache_date(timestamp2)
 
 @cli.command()
 @click.argument("room", required=False)
