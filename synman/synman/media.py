@@ -64,7 +64,7 @@ class Media:
             result = r.json()
             print("{} local media was deleted".format(result["total"]))
         else:
-            print("Error no local media was not deleted")
+            print("Error no local media was not deleted\n{}".format(r))
 
         if r2.status_code == 200:
             result2 = r.json()
