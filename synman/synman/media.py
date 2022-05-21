@@ -47,7 +47,7 @@ class Media:
                 media = r2.json()
                 print("{} ({}):".format(user["name"], media["total"]))
                 for m in media["media"]:
-                    print(m["media_id"])
+                    self.delete_media(m["media_id"])
     
     def delete_media(self, mediaID):
         r = requests.delete('http://localhost:8008/_synapse/admin/v1/media/{}/{}'.format(self.server_name, mediaID), headers=self.headers)
