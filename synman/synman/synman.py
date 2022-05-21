@@ -6,6 +6,7 @@ from synman.reports import Reports
 import click
 import json
 from tabulate import tabulate
+from datetime import (datetime, timedelta)
 
 @click.group()
 def cli():
@@ -28,6 +29,7 @@ def report(read, event_id, detail, token):
 @cli.command()
 @click.option("--list", "list_media", default=False, help="list media", is_flag=True)
 @click.option("--clean", "clean_media", default=False, help="clean media", is_flag=True)
+@click.option("--delete", "delete_date", default=False, help="delete old media", is_flag=True)
 @click.option("--token", help="Admin Token from Matrix client", required=True)
 def media(list_media, clean_media, token):
     """Manage media files"""
@@ -36,6 +38,9 @@ def media(list_media, clean_media, token):
         my_media.list_media()
     elif clean_media:
         my_media.clean_media()
+    elif delete_date:
+        timestamp = int((datetime.now() - timedelta(days=356)).timestamp() * 1000)
+        my_media.delete_local_date(timestamp)
 
 @cli.command()
 @click.argument("room", required=False)

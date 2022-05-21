@@ -58,10 +58,16 @@ class Media:
 
     def delete_local_date(self, timestamp):
         r = requests.post('http://localhost:8008/_synapse/admin/v1/media/{}/delete?before_ts={}'.format(self.server_name, timestamp), headers=self.headers)
-
-        result = r.json()
+        r2 = requests.post('http://localhost:8008/_synapse/admin/v1/purge_media_cache?before_ts={}'.format(timestamp), headers=self.headers)
 
         if r.status_code == 200:
-            print("{} Media was deleted".format(result["total"]))
+            result = r.json()
+            print("{} local media was deleted".format(result["total"]))
         else:
-            print("Error media was not deleted")
+            print("Error no local media was not deleted")
+
+        if r2.status_code == 200:
+            result2 = r.json()
+            print("{} cache media was deleted".format(result2["total"]))
+        else:
+            print("Error no cache media was not deleted")
