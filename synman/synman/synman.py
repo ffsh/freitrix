@@ -31,7 +31,7 @@ def report(read, event_id, detail, token):
 @click.option("--clean", "clean_media", default=False, help="clean media", is_flag=True)
 @click.option("--delete", "delete_date", default=False, help="delete old media", is_flag=True)
 @click.option("--token", help="Admin Token from Matrix client", required=True)
-def media(list_media, clean_media, token):
+def media(list_media, clean_media, delete_date, token):
     """Manage media files"""
     my_media = Media(token)
     if list_media:
