@@ -11,6 +11,7 @@ class Media:
         self.headers["Accept"] = "application/json"
         self.headers["Content-Type"] = 'Content-Type: application/json'
         self.headers["Authorization"] = "Bearer {}".format(token)
+        self.server_name = "freitrix.de"
 
     def __convert_bytes(self, hoarder):
         hoarder[4] = humanize.naturalsize(hoarder[4])
@@ -47,5 +48,10 @@ class Media:
                 
                 print(user["name"], user["displayname"], media["total"])
     
-    def delete_media(self):
-        pass
+    def delete_media(self, mediaID):
+        r = requests.delete('http://localhost:8008/_synapse/admin/v1/media/{}/{}'.format(self.server_name, mediaID), headers=self.headers)
+
+        if r.status_code == 200:
+            print("Media was deleted")
+        else:
+            print("Error media was not deleted")
