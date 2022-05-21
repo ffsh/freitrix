@@ -55,3 +55,13 @@ class Media:
             print("Media was deleted")
         else:
             print("Error media was not deleted")
+
+    def delete_local_date(self, timestamp):
+        r = requests.post('http://localhost:8008/_synapse/admin/v1/media/{}/delete?before_ts={}'.format(self.server_name, timestamp), headers=self.headers)
+
+        result = r.json()
+
+        if r.status_code == 200:
+            print("{} Media was deleted".format(result["total"]))
+        else:
+            print("Error media was not deleted")
