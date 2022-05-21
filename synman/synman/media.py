@@ -45,8 +45,9 @@ class Media:
             if user["deactivated"] == 1:
                 r2 = requests.get('http://localhost:8008/_synapse/admin/v1/users/{}/media'.format(user["name"]), headers=self.headers)
                 media = r2.json()
-                
-                print(user["name"], user["displayname"], media["total"])
+                print("{} ({}):".format(user["name"], media["total"]))
+                for m in media["media"]:
+                    print(m["media_id"])
     
     def delete_media(self, mediaID):
         r = requests.delete('http://localhost:8008/_synapse/admin/v1/media/{}/{}'.format(self.server_name, mediaID), headers=self.headers)
@@ -71,6 +72,6 @@ class Media:
 
         if r.status_code == 200:
             result = r.json()
-            print("{} cache media was deleted".format(result["total"]))
+            print("{} cache media was deleted".format(result["deleted"]))
         else:
             print("Error no cache media was not deleted\n{}".format(r))
