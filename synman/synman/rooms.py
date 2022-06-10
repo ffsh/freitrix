@@ -46,6 +46,14 @@ class Rooms():
         for room in rooms["rooms"]:
             biggestRooms.append([room["name"], room["joined_members"], room["joined_local_members"], room["version"]])
         print(tabulate(biggestRooms, headers=["Name", "Members", "Local Members", "Version"]))
+
+        r = requests.get('http://localhost:8008/_synapse/admin/v1/rooms?limit=10&order_by=state_events', headers=self.headers)
+        rooms = r.json()
+        biggestRooms = []
+        print("\nBiggest rooms sorted by state events")
+        for room in rooms["rooms"]:
+            biggestRooms.append([room["name"], room["joined_members"], room["joined_local_members"], room["version"], room["state_events"]])
+        print(tabulate(biggestRooms, headers=["Name", "Members", "Local Members", "Version", "Events"]))
     
     def info(self, room):
         r = requests.get('http://localhost:8008/_synapse/admin/v1/rooms/{}'.format(room), headers=self.headers)
