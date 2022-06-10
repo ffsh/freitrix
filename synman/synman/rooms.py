@@ -24,9 +24,9 @@ class Rooms():
                 print("ID: {}, has no local members".format(room["room_id"]))
                 print("Name: {}".format(room["name"]))
                 print("Alias: {}".format(room["canonical_alias"]))
-                r2 = requests.delete('http://localhost:8008/_synapse/admin/v1/rooms/{}'.format(room["room_id"]), headers=self.headers, data=body)
+                r2 = requests.delete('http://localhost:8008/_synapse/admin/v2/rooms/{}'.format(room["room_id"]), headers=self.headers, data=body)
                 if r2.status_code == 200:
-                    print("deleted")
+                    print("Delete Request accepted")
                 else:
                     print("{} Error: {}".format(r2.status_code, r2.json()))
                 print("--------")
