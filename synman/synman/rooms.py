@@ -30,7 +30,7 @@ class Rooms():
                 else:
                     print("{} Error: {}".format(r2.status_code, r2.json()))
                 print("--------")
-        print("{} rooms deleted.".format(count))
+        print("{} rooms will be deleted.".format(count))
 
     def list_rooms(self):
         r = requests.get('http://localhost:8008/_synapse/admin/v1/rooms?limit=10&order_by=joined_members', headers=self.headers)
