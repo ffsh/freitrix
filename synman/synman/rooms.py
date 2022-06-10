@@ -27,6 +27,8 @@ class Rooms():
                 r2 = requests.delete('http://localhost:8008/_synapse/admin/v1/rooms/{}'.format(room["room_id"]), headers=self.headers, data=body)
                 if r2.status_code == 200:
                     print("deleted")
+                else:
+                    print("{} Error: {}".format(r2.status_code, r2.message))
                 print("--------")
         print("{} rooms deleted.".format(count))
 
@@ -52,7 +54,7 @@ class Rooms():
         biggestRooms = []
         print("\nBiggest rooms sorted by state events")
         for room in rooms["rooms"]:
-            if room["name"] == "":
+            if room["name"] == None:
                room["name"] = room["room_id"]
             biggestRooms.append([room["name"], room["joined_members"], room["joined_local_members"], room["version"], room["state_events"]])
         print(tabulate(biggestRooms, headers=["Name", "Members", "Local Members", "Version", "Events"]))
