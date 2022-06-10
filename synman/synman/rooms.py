@@ -28,7 +28,7 @@ class Rooms():
                 if r2.status_code == 200:
                     print("deleted")
                 else:
-                    print("{} Error: {}".format(r2.status_code, r2.message))
+                    print("{} Error: {}".format(r2.status_code, r2.json()))
                 print("--------")
         print("{} rooms deleted.".format(count))
 
