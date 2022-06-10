@@ -52,6 +52,8 @@ class Rooms():
         biggestRooms = []
         print("\nBiggest rooms sorted by state events")
         for room in rooms["rooms"]:
+            if room["name"] == "":
+               room["name"] = room["room_id"]
             biggestRooms.append([room["name"], room["joined_members"], room["joined_local_members"], room["version"], room["state_events"]])
         print(tabulate(biggestRooms, headers=["Name", "Members", "Local Members", "Version", "Events"]))
     
