@@ -47,7 +47,7 @@ def media(list_media, clean_media, delete_date, token):
 @cli.command()
 @click.argument("room", required=False)
 @click.option("--clean", "clean", default=False, help="Removes empty rooms", is_flag=True)
-@click.option("--status", "status", default=False, help="Returns deletion status, --status DELETION_ID")
+@click.option("--status", help="Returns deletion status, --status DELETION_ID")
 @click.option("--list", "list_rooms", default=False, help="List rooms", is_flag=True)
 @click.option("--info", "info", default=False, help="Info about room", is_flag=True)
 @click.option("--token", help="Admin Token from Matrix client", required=True)
