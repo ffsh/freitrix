@@ -33,6 +33,10 @@ class Rooms():
                 print("--------")
         print("{} rooms will be deleted.".format(count))
 
+    def del_status(self, deletion_id):
+        r = requests.get('http://localhost:8008/_synapse/admin/v2/rooms/{}/delete_status'.format(deletion_id), headers=self.headers)
+        print(r.json())
+
     def list_rooms(self):
         r = requests.get('http://localhost:8008/_synapse/admin/v1/rooms?limit=10&order_by=joined_members', headers=self.headers)
         rooms = r.json()
