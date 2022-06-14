@@ -71,10 +71,8 @@ class Rooms():
         biggestRooms = []
         print("\nBiggest rooms sorted by state events")
         for room in rooms["rooms"]:
-            if room["name"] == None:
-               room["name"] = room["room_id"]
-            biggestRooms.append([room["name"], room["joined_members"], room["joined_local_members"], room["version"], room["state_events"]])
-        print(tabulate(biggestRooms, headers=["Name", "Members", "Local Members", "Version", "Events"]))
+            biggestRooms.append([room["room_id"], room["name"], room["joined_members"], room["joined_local_members"], room["version"], room["state_events"]])
+        print(tabulate(biggestRooms, headers=["ID", "Name", "Members", "Local Members", "Version", "Events"]))
     
     def info(self, room):
         r = requests.get('http://localhost:8008/_synapse/admin/v1/rooms/{}'.format(room), headers=self.headers)
