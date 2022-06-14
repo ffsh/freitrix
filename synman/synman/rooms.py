@@ -25,7 +25,7 @@ class Rooms():
                 if deletion_status == "complete":
                     deleted = True
                 else:
-                    sleep(5)
+                    time.sleep(5)
             return "Room was deleted."
         else:
             return r.json()
