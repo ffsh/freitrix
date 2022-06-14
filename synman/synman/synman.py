@@ -54,7 +54,7 @@ def media(list_media, clean_media, delete_date, token):
 @click.option("--list", "list_rooms", default=False, help="List rooms", is_flag=True)
 @click.option("--info", "info", default=False, help="Info about room", is_flag=True)
 @click.option("--token", help="Admin Token from Matrix client", required=True)
-def rooms(clean, list_rooms, info, room, token, delete_status, purge_history, purge_status):
+def rooms(clean, list_rooms, info, room, token, delete_status, purge_history, purge_status, short):
     """Manage rooms"""
     my_room = Rooms(token)
     if clean:
