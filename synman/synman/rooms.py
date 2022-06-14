@@ -48,6 +48,10 @@ class Rooms():
         else:
             print("ERROR:")
             print(r.json())
+    
+    def purge_status(self, purge_id):
+        r = requests.get('http://localhost:8008/_synapse/admin/v1/purge_history_status/{}'.format(purge_id), headers=self.headers)
+        print(r.json())
 
     def list_rooms(self):
         r = requests.get('http://localhost:8008/_synapse/admin/v1/rooms?limit=10&order_by=joined_members', headers=self.headers)

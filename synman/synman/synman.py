@@ -47,12 +47,13 @@ def media(list_media, clean_media, delete_date, token):
 @cli.command()
 @click.argument("room", required=False)
 @click.option("--clean", "clean", default=False, help="Removes empty rooms", is_flag=True)
-@click.option("--status", help="Returns deletion status, --status DELETION_ID")
+@click.option("--delete-status", "delete_status", help="Returns deletion status, --delete-status DELETION_ID")
 @click.option("--purge-history", "purge_history", help="purge history up to 1 year of a given room by room id, --purge-history ROOM_ID")
+@click.option("--purge-status", "purge_status", help="Returns purge status, --purge-status PURGE_ID")
 @click.option("--list", "list_rooms", default=False, help="List rooms", is_flag=True)
 @click.option("--info", "info", default=False, help="Info about room", is_flag=True)
 @click.option("--token", help="Admin Token from Matrix client", required=True)
-def rooms(clean, list_rooms, info, room, token, status, purge_history):
+def rooms(clean, list_rooms, info, room, token, delete_status, purge_history, purge_status):
     """Manage rooms"""
     my_room = Rooms(token)
     if clean:
@@ -62,12 +63,14 @@ def rooms(clean, list_rooms, info, room, token, status, purge_history):
     elif info:
         if room is not None:
             my_room.info(room)
-    elif status:
-        my_room.del_status(status)
+    elif delete_status:
+        my_room.del_status(delete_status)
     elif purge_history:
         one_year_ago = int((datetime.now() - timedelta(days=356)).timestamp() * 1000)
         #print(purge_history[0], purge_history[1])
         my_room.purge_history(purge_history, one_year_ago)
+    elif purge_status:
+        my_room.purge_status(purge_status)
 
 @cli.command()
 @click.argument("user", required=True)
