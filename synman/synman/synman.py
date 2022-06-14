@@ -49,6 +49,7 @@ def media(list_media, clean_media, delete_date, token):
 @click.option("--clean", "clean", default=False, help="Removes empty rooms", is_flag=True)
 @click.option("--delete-status", "delete_status", help="Returns deletion status, --delete-status DELETION_ID")
 @click.option("--purge-history", "purge_history", help="purge history up to 1 year of a given room by room id, --purge-history ROOM_ID")
+@click.option("--short", "short", default=False, help="purge history of room up to 30 days ago instead of 1 year", is_flag=True)
 @click.option("--purge-status", "purge_status", help="Returns purge status, --purge-status PURGE_ID")
 @click.option("--list", "list_rooms", default=False, help="List rooms", is_flag=True)
 @click.option("--info", "info", default=False, help="Info about room", is_flag=True)
@@ -66,9 +67,13 @@ def rooms(clean, list_rooms, info, room, token, delete_status, purge_history, pu
     elif delete_status:
         my_room.del_status(delete_status)
     elif purge_history:
+        one_month_ago = int((datetime.now() - timedelta(days=30)).timestamp() * 1000)
         one_year_ago = int((datetime.now() - timedelta(days=356)).timestamp() * 1000)
         #print(purge_history[0], purge_history[1])
-        my_room.purge_history(purge_history, one_year_ago)
+        if short:
+            my_room.purge_history(purge_history, one_month_ago)
+        else:
+            my_room.purge_history(purge_history, one_year_ago)
     elif purge_status:
         my_room.purge_status(purge_status)
 
