@@ -12,9 +12,24 @@ class Rooms():
         self.headers["Content-Type"] = 'Content-Type: application/json'
         self.headers["Authorization"] = "Bearer {}".format(token)
 
-    def clean(self):
+    def clean_helper(self, room_id):
         body='{"message": "Room is empty therefore it is removed.", "block": false, "purge": true}'
+        deleted = False
 
+        r = requests.delete('http://localhost:8008/_synapse/admin/v2/rooms/{}'.format(room_id), headers=self.headers, data=body)
+        if r.status_code == 200:
+            deletion_id = r.json()["delete_id"]
+            while not deleted:
+                deletion_status = self.del_status_helper(deletion_id)
+                if deletion_status == "complete":
+                    deleted = True
+                else:
+                    sleep(5)
+            return "Room was deleted."
+        else:
+            return r.json()
+
+    def clean(self):
         r = requests.get('http://localhost:8008/_synapse/admin/v1/rooms?limit=800', headers=self.headers)
         rooms = r.json()
         count=0
@@ -24,18 +39,26 @@ class Rooms():
                 print("ID: {}, has no local members".format(room["room_id"]))
                 print("Name: {}".format(room["name"]))
                 print("Alias: {}".format(room["canonical_alias"]))
-                r2 = requests.delete('http://localhost:8008/_synapse/admin/v2/rooms/{}'.format(room["room_id"]), headers=self.headers, data=body)
-                if r2.status_code == 200:
-                    print("Delete ID: {}".format(r2.json()["delete_id"]))
-                    print("Delete Request accepted")
-                else:
-                    print("{} Error: {}".format(r2.status_code, r2.json()))
+                self.clean_helper(room["room_id"])
                 print("--------")
-        print("{} rooms will be deleted.".format(count))
+        print("{} rooms were deleted.".format(count))
+
+    def del_status_helper(self, deletion_id):
+        r = requests.get('http://localhost:8008/_synapse/admin/v2/rooms/delete_status/{}'.format(deletion_id), headers=self.headers)
+        
+        status = r.json()
+
+        if status['status'] == "complete":
+            return "complete"
+        elif status['status'] == "purging":
+            return "purging"
+        elif status['status'] == "shutting_down":
+            return "shutting_down"
+        elif status['status'] == "failed":
+            return "failed: {}".format(status["error"])
 
     def del_status(self, deletion_id):
-        r = requests.get('http://localhost:8008/_synapse/admin/v2/rooms/delete_status/{}'.format(deletion_id), headers=self.headers)
-        print(r.json())
+        print(self.del_status_helper(deletion_id))
 
     def purge_history(self, room_id, timestamp):
         body = {
@@ -49,9 +72,19 @@ class Rooms():
             print("ERROR:")
             print(r.json())
     
-    def purge_status(self, purge_id):
+    def purge_status_helper(self, purge_id):
         r = requests.get('http://localhost:8008/_synapse/admin/v1/purge_history_status/{}'.format(purge_id), headers=self.headers)
-        print(r.json())
+        status = r.json()
+
+        if status['status'] == "complete":
+            return "complete"
+        elif status['status'] == "active":
+            return "active"
+        elif status['status'] == "failed":
+            return "failed: {}".format(status["error"])
+
+    def purge_status(self, purge_id):
+        print(self.purge_status_helper(purge_id))
 
     def list_rooms(self):
         r = requests.get('http://localhost:8008/_synapse/admin/v1/rooms?limit=10&order_by=joined_members', headers=self.headers)
