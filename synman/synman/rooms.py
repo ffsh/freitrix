@@ -41,7 +41,8 @@ class Rooms():
         body = {
             "purge_up_to_ts": timestamp
         }
-        r = requests.post('http://localhost:8008/_synapse/admin/v1/purge_history/{}'.format(room_id), headers=self.headers, data=body)
+        r = requests.post('http://localhost:8008/_synapse/admin/v1/purge_history/{}'.format(room_id), 
+            headers=self.headers, data=json.dumps(body))
         if r.status_code == 200:
             print("Purge ID:", r.json()["purge_id"])
         else:
