@@ -65,8 +65,8 @@ def rooms(clean, list_rooms, info, room, token, status, purge_history):
     elif status:
         my_room.del_status(status)
     elif purge_history:
-        print(purge_history[0], purge_history[1])
-        # my_room.purge_history(purge_history[0], purge_history[1])
+        #print(purge_history[0], purge_history[1])
+        my_room.purge_history(purge_history)
 
 @cli.command()
 @click.argument("user", required=True)
