@@ -40,7 +40,7 @@ class Rooms():
                 print("ID: {}, has no local members".format(room["room_id"]))
                 print("Name: {}".format(room["name"]))
                 print("Alias: {}".format(room["canonical_alias"]))
-                self.clean_helper(room["room_id"])
+                print(self.clean_helper(room["room_id"]))
                 print("--------")
         print("{} rooms were deleted.".format(count))
 
